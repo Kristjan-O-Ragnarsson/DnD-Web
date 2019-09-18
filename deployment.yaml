@@ -22,7 +22,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dnd-web
+        name: dnd-web-load-balancer
   labels:
     app: dnd-web
 spec:
