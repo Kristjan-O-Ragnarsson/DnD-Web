@@ -6,6 +6,17 @@ import axios from 'axios';
 // Fetching data with react hooks: https://www.robinwieruch.de/react-hooks-fetch-data
 
 function App() {
+  const [data, setData] = useState({hits: []});
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const result = await axios("https://api.open5e.com/classes/");
+      setData(result.data);
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="App">
       <header className="App-header">
