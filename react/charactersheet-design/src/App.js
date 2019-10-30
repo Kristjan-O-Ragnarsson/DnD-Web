@@ -4,22 +4,34 @@ import { Container, Form, Grid, Divider, Segment, Header, Table, Popup } from 's
 
 const formFields = {
   group1: [
-    <Form.Input label="Character name" width={6} />,
-    <Form.Input label="Player name" width={6} />
+    <Form.Input key={"cName"} label="Character name" width={6} />,
+    <Form.Input key={"pName"} label="Player name" width={6} />
   ],
   group2: [
-    <Form.Input label="Class" />,
-    <Form.Input label="Race" />,
-    <Form.Input label="Level" />
+    <Form.Input key={"class"} label="Class" />,
+    <Form.Input key={"level"} label="Level" width={2}/>,
   ],
   group3: [
-    <Form.Input label="HP" width={2} />,
-    <Form.Input label="AC" width={2} />,
-    <Form.Input label="Initiative" width={2} />,
-    <Form.Input label="Speed" width={2}/>
+    <Form.Input key={"race"} label="Race" />,
+    <Form.Input key={"prof"} label="Proficiency" width={2}/>
+  ],
+  group4: [
+    <Form.Input key={"hp"} label="HP" width={2} />,
+    <Form.Input key={"ac"} label="AC" width={2} />,
+    <Form.Input key={"init"} label="Initiative" width={2} />,
+    <Form.Input key={"speed"} label="Speed" width={2}/>
+  ],
+  group5: [
+
+  ],
+  group6: [
+    <Form.Input key={"persTraits"} label="Personality traits" />,
+    <Form.Input key={"ideals"} label="Ideals" />,
+    <Form.Input key={"bonds"} label="Bonds" />,
+    <Form.Input key={"flaws"} label="Flaws" />
   ],
   groupSample: [
-    <Form.Input label="" />
+    <Form.Input key={"empty"} label="" />
   ]
 }
 
@@ -45,38 +57,42 @@ class AbilityTable extends React.Component {
     return ability.base + ability.raceMod + ability.otherMod;
   }
 
-  render() {
-
-    let headers = [];
-    this.headers.forEach(header => {
-      headers.push(<Table.HeaderCell>{header}</Table.HeaderCell>);
-    });
-    this.state.elems.push(
-      <Table.Row>{headers}</Table.Row>
-    );
-
+  fillStateElems(){
     this.state.abilities.forEach((ability, i) => {
+      let key = ability.id;
       this.state.elems.push(
-        <Table.Row>
-          <Table.Cell>{ability.name}</Table.Cell>
-          <Table.Cell>
-            <Form.Input 
-              id={ability.id} 
-              fluid 
-              type="number" 
-              value={ability.base}
-            />
+        <Table.Row key={"row-"+key}>
+          <Table.Cell key={key+"-name"} >{ability.name}</Table.Cell>
+          <Table.Cell key={key+"-base"} >
+            <Form.Input id={ability.id} fluid type="number" size="mini" value={ability.base} />
           </Table.Cell>
-          <Table.Cell>{ability.raceMod}</Table.Cell>
-          <Table.Cell>{ability.otherMod}</Table.Cell>
-          <Table.Cell>{this.updateAbilityScore(ability)}</Table.Cell>
+          <Table.Cell key={key+"-race"} >{ability.raceMod}</Table.Cell>
+          <Table.Cell key={key+"-other"} >{ability.otherMod}</Table.Cell>
+          <Table.Cell key={key+"-sum"} >{this.updateAbilityScore(ability)}</Table.Cell>
         </Table.Row>
       );
     });
+  }
+
+  render() {
+
+    let headerCells = [];
+    this.headers.forEach((header, i) => {
+      headerCells.push(<Table.HeaderCell key={i}>{header}</Table.HeaderCell>);
+    });
+
+    this.fillStateElems();
 
     return (
-      <Table unstackable striped textAlign="center" >
-        {this.state.elems}
+      <Table unstackable striped textAlign="center" compact>
+        <Table.Header>
+          <Table.Row>
+            {headerCells}
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {this.state.elems}
+        </Table.Body>
 
       </Table>
     );
@@ -99,21 +115,37 @@ function App() {
 
         <Segment>
 
-          <Form.Group>
-            {formFields.group2}
-          </Form.Group>
-
           <Grid columns={2} stackable>
+
             <Grid.Column>
-              <AbilityTable />
-            </Grid.Column>
-            <Grid.Column>
+
+              <Form.Group>
+                {formFields.group2}
+              </Form.Group>
               <Form.Group>
                 {formFields.group3}
               </Form.Group>
+              <Form.Group>
+                {formFields.group4}
+              </Form.Group>
+              <Form.Group>
+                {formFields.group5}
+              </Form.Group>
+              <Form.Group>
+                {formFields.group6}
+              </Form.Group>
+
+            </Grid.Column>
+
+            <Grid.Column>
+
+              <AbilityTable />
+              
             </Grid.Column>
           </Grid>
+
         </Segment>
+
       </Form>
     
     </Container>
