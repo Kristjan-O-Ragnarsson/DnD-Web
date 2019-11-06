@@ -27,7 +27,24 @@ const formFields = {
     <Form.Input key={"init"} label="Initiative" width={2} />,
     <Form.Input key={"speed"} label="Speed" width={2} />
   ],
+  /* 
+  1 feature
+  2 skills
+  2 tool profs or languages
+  Equipment or coins*/
   group5: [
+    <Form.Group key="g5a">
+      <Form.Input key={"background"}  label="Background" width={10}/>
+      <Form.Button key={"newBackground"} label="&nbsp;" width={6}>Create new</Form.Button>
+    </Form.Group>,
+    <Form.Group key="g5b">
+      <Form.Select key="skill1" label="Skill:"
+        options={[
+          {key: "1", text:"Placeholder1", value:"p1"},
+          {key: "1", text:"Placeholder2", value:"p2"}
+        ]} 
+      />
+    </Form.Group>
 
   ],
   group6: [
@@ -130,9 +147,9 @@ function App() {
       <Form>
 
         {/**/}
-        {/* Basic information */}
-        {/* First segment - wrapping around the first "row" of columns. */}
         <Segment>
+        {/* Basic information */}
+        {/* First Row - wrapping around the first row of columns. */}
           <Grid columns={2} stackable divided>
             {/* Grid Column 1 */}
             <Grid.Row stretched>
@@ -153,24 +170,26 @@ function App() {
 
             {/* -------------------------------------------------------------- */}
 
-            {/* Features and skill */}
-            {/* Second segment - wrapping around the second "row" of columns */}
+            {/* Personality and background */}
+            {/* Second Row - wrapping around the sceond row of columns */}
             {/* Grid Column 1 */}
             <Grid.Row>
               <Grid.Column>
-  
+                <Form.Group>
+                  {formFields.group5}
+                </Form.Group>
               </Grid.Column>
   
               {/* Grid Column 2 */}
               <Grid.Column>
-  
+                {formFields.group6}
               </Grid.Column>
             </Grid.Row>
 
             {/* -------------------------------------------------------------- */}
 
             {/* Personality and description */}
-            {/* Third Row - wrapping around the third "row" of columns */}
+            {/* Third Row - wrapping around the third row of columns */}
             {/* Grid Column 1 */}
             <Grid.Row>
               <Grid.Column>
@@ -179,7 +198,7 @@ function App() {
   
               {/* Grid Column 2 */}
               <Grid.Column>
-                {formFields.group6}
+                
               </Grid.Column>
             </Grid.Row>
         </Grid>
