@@ -1,0 +1,1 @@
+from resources.helloworld.main import HelloWorld
