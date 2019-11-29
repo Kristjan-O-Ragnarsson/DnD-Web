@@ -1,5 +1,11 @@
 import React from 'react';
 import { Form, Header, Table, Dropdown } from 'semantic-ui-react';
+import { useAsync } from "react-async";
+
+  const loadRaces = async () => await fetch("https://api.open5e.com/races/")
+    .then(res => (res.ok ? res : Promise.reject(res)))
+    .then(res => res.json());
+
 
 const skills = {
   Athletics: {value: 0, other: "placeholder?"},
@@ -37,6 +43,12 @@ const toolProfSelect = setSelectOptions(toolProfs);
 const languageSelect = setSelectOptions(languages);
 const featureSelect = setSelectOptions(features);
 function BasicInfo(props) {
+  const { data, error, isLoading } = useAsync({ promiseFn: loadRaces });
+    if (isLoading) return "Loading... ";
+    if (error) return `Something went wrong: ${error.message}`;
+    if (data) return `Select race from list`;
+  
+  console.log(data);
   return (
     <React.Fragment>
       <Form.Group>
@@ -44,6 +56,12 @@ function BasicInfo(props) {
           <Form.Input label="Player name" width={6} />
       </Form.Group>
       <Form.Group>
+          <Dropdown
+            placeholder="string"
+            fluid
+            selection
+            options={data}
+            />
         <Form.Input label="Race" />,
         <Form.Input label="Proficiency" width={2} />
       </Form.Group>
