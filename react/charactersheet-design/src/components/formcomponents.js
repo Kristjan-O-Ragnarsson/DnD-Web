@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Header, Table, Dropdown } from 'semantic-ui-react';
 import { useAsync } from "react-async";
 
-  const loadRaces = async () => await fetch("https://api.open5e.com/races/")
-    .then(res => (res.ok ? res : Promise.reject(res)))
-    .then(res => res.json());
+const loadRaces = async () => await fetch("https://api.open5e.com/races/")
+  .then(res => (res.ok ? res : Promise.reject(res)))
+  .then(res => res.json());
+const loadClasses = async () => await fetch("https://api.open5e.com/classes/")
+  .then(res => (res.ok ? res : Promise.reject(res)))
+  .then(res => res.json());
 
 
 const skills = {
@@ -38,37 +41,103 @@ function setSelectOptions(obj) {
   return tempObject;
 }
 
+// fetchLoading and fetchError are just simple methods to get 
+// variables which are needed for many operations
+function fetchLoading(fetchName) {
+  // Should return as: _placeholder = "loading" and _options=[{key: , text:}]
+  return [
+    "loading",
+    [{key:`${fetchName}_loading`, text:"loading"}]
+  ];
+}
+function fetchError(err, fetchName) {
+  return [
+    `Something went wrong: ${err.message}`,
+  [{key:`${fetchName}_error`, text:"error"}]
+];
+}
+
+function SelectRace(props) {
+  let _placeholder = "";
+  let _options = [];
+  const { data, error, isLoading } = useAsync({ promiseFn: loadRaces });
+  if (isLoading) [_placeholder, _options] = fetchLoading("race"); 
+  if (error) [_placeholder, _options] = fetchError(error.message, "race");
+  if (data) {
+    _placeholder = data.results[0].name;
+    _options = data.results.map(race => {
+      return {key:`race_${race.name}`, text:race.name, value:race.name};
+    });
+  }
+
+  return (
+    <Form.Field>
+      <label>Select a race</label>
+      <Dropdown
+        placeholder={_placeholder}
+        selection
+        scrolling
+        options={_options}
+        />
+      </Form.Field>
+  );
+}
+
+function SelectClass(props) {
+  let _placeholder = "";
+  let _options = [];
+  const { data, error, isLoading } = useAsync({ promiseFn: loadClasses });
+  if (isLoading) [_placeholder, _options] = fetchLoading("class"); 
+  if (error) [_placeholder, _options] = fetchError(error.message, "class");
+  if (data) {
+    _placeholder = data.results[0].name;
+    _options = data.results.map(_class => {
+      return {key:`class_${_class.name}`, text:_class.name, value:_class.name};
+    });
+  }
+
+  return (
+    <Form.Field>
+      <label>Select a class</label>
+      <Dropdown
+        placeholder={_placeholder}
+        selection
+        scrolling
+        options={_options}
+        />
+      </Form.Field>
+  );
+}
+
+
 const skillSelect = setSelectOptions(skills);
 const toolProfSelect = setSelectOptions(toolProfs);
 const languageSelect = setSelectOptions(languages);
 const featureSelect = setSelectOptions(features);
 function BasicInfo(props) {
-  const { data, error, isLoading } = useAsync({ promiseFn: loadRaces });
-    if (isLoading) return "Loading... ";
-    if (error) return `Something went wrong: ${error.message}`;
-    if (data) return `Select race from list`;
-  
-  console.log(data);
+  const [prof, setProf] = useState(2);
+  function handleLevelChange(e) {
+    let lvl = e.target.value;
+    // Formula to calculate the proficiency bonus
+    setProf(Math.floor((lvl-1)/4) + 2);
+  }
+
   return (
     <React.Fragment>
       <Form.Group>
-        <Form.Input label="Character name" width={6} />,
-          <Form.Input label="Player name" width={6} />
+        <Form.Input label="Character name" width={6} />
+        <Form.Input label="Player name" width={6} />
+        <Form.Input id="inpLvl" label="Level" width={2} onChange={handleLevelChange}/>
       </Form.Group>
       <Form.Group>
-          <Dropdown
-            placeholder="string"
-            fluid
-            selection
-            options={data}
-            />
-        <Form.Input label="Race" />,
-        <Form.Input label="Proficiency" width={2} />
+        <SelectRace />
+        <SelectClass />
+        <Form.Input label="Proficiency" width={2} value={prof} />
       </Form.Group>
       <Form.Group>
-        <Form.Input label="HP" width={2} />,
-        <Form.Input label="AC" width={2} />,
-        <Form.Input label="Initiative" width={2} />,
+        <Form.Input label="HP" width={2} />
+        <Form.Input label="AC" width={2} />
+        <Form.Input label="Initiative" width={2} />
         <Form.Input label="Speed" width={2} />
       </Form.Group>
     </React.Fragment>
