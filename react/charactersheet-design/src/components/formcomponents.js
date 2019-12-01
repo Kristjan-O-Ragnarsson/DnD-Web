@@ -2,6 +2,20 @@ import React, { useState } from 'react';
 import { Form, Header, Table, Dropdown } from 'semantic-ui-react';
 import { useAsync } from "react-async";
 
+function fetchLoading(fetchName) {
+  // Should return as: _placeholder = "loading" and _options=[{key: , text:}]
+  return [
+    "loading",
+    [{key:`${fetchName}_loading`, text:"loading"}]
+  ];
+}
+function fetchError(err, fetchName) {
+  return [
+    `Something went wrong: ${err.message}`,
+    [{key:`${fetchName}_error`, text:"error"}]
+  ];
+}
+
 const loadRaces = async () => await fetch("https://api.open5e.com/races/")
   .then(res => (res.ok ? res : Promise.reject(res)))
   .then(res => res.json());
@@ -41,20 +55,61 @@ function setSelectOptions(obj) {
   return tempObject;
 }
 
-// fetchLoading and fetchError are just simple methods to get 
-// variables which are needed for many operations
-function fetchLoading(fetchName) {
-  // Should return as: _placeholder = "loading" and _options=[{key: , text:}]
-  return [
-    "loading",
-    [{key:`${fetchName}_loading`, text:"loading"}]
-  ];
+class CharacterInfo extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      race: "",
+      class: "",
+      level: 0,
+      proficiency: 0,
+      str: 0,
+      dex: 0,
+      con: 0,
+      int: 0,
+      wis: 0,
+      char: 0
+    }
+    this.updateStat = this.updateStat.bind(this);
+  }
+
+  updateStat(key, value) { this.setState({[key]: value}); console.log(this.state); }
+  //updateStat(key, value) { console.log(key + " and " + value)}
+  //updateStat(e) { this.setState({level: e.target.value}); }
+
+  render() {
+    return(
+      <React.Fragment>
+        <Form.Group>
+          <Form.Input label="Character name" width={6} />
+          <Form.Input label="Player name" width={6} />
+          <ChangeLevel update={this.updateStat}/>
+        </Form.Group>
+        <Form.Group>
+          <SelectRace update={this.updateStat} />
+          <SelectClass update={this.updateStat} />
+          <Form.Input label="Proficiency" width={2} value={this.state.proficiency} />
+        </Form.Group>
+        <Form.Group>
+          <Form.Input label="HP" width={2} />
+          <Form.Input label="AC" width={2} />
+          <Form.Input label="Initiative" width={2} />
+          <Form.Input label="Speed" width={2} />
+        </Form.Group>
+      </React.Fragment>
+    );
+  }
 }
-function fetchError(err, fetchName) {
-  return [
-    `Something went wrong: ${err.message}`,
-  [{key:`${fetchName}_error`, text:"error"}]
-];
+
+function ChangeLevel(props) {
+  function handleLevelChange(e) {
+    let lvl = e.target.value;
+    props.update("level", lvl);
+    props.update("proficiency", Math.floor((lvl-1)/4)+2);
+  }
+  return(
+    <Form.Input type="number" label="Level" width={3} onChange={handleLevelChange}/>
+  );
 }
 
 function SelectRace(props) {
@@ -70,6 +125,10 @@ function SelectRace(props) {
     });
   }
 
+  function updateParent(e, { value }) {
+    props.update("race", value);
+  }
+
   return (
     <Form.Field>
       <label>Select a race</label>
@@ -78,6 +137,7 @@ function SelectRace(props) {
         selection
         scrolling
         options={_options}
+        onChange={updateParent}
         />
       </Form.Field>
   );
@@ -96,6 +156,10 @@ function SelectClass(props) {
     });
   }
 
+  function updateParent(e, { value }) {
+    props.update("class", value);
+  }
+
   return (
     <Form.Field>
       <label>Select a class</label>
@@ -104,11 +168,11 @@ function SelectClass(props) {
         selection
         scrolling
         options={_options}
+        onChange={updateParent}
         />
       </Form.Field>
   );
 }
-
 
 const skillSelect = setSelectOptions(skills);
 const toolProfSelect = setSelectOptions(toolProfs);
@@ -118,8 +182,8 @@ function BasicInfo(props) {
   const [prof, setProf] = useState(2);
   function handleLevelChange(e) {
     let lvl = e.target.value;
-    // Formula to calculate the proficiency bonus
-    setProf(Math.floor((lvl-1)/4) + 2);
+    // Formula to calculate the proficiency bonus - can't be lower than 2
+    lvl < 1 ? setProf(2) : setProf(Math.floor((lvl-1)/4) + 2);
   }
 
   return (
@@ -127,7 +191,7 @@ function BasicInfo(props) {
       <Form.Group>
         <Form.Input label="Character name" width={6} />
         <Form.Input label="Player name" width={6} />
-        <Form.Input id="inpLvl" label="Level" width={2} onChange={handleLevelChange}/>
+        <Form.Input type="number" label="Level" width={3} onChange={handleLevelChange}/>
       </Form.Group>
       <Form.Group>
         <SelectRace />
@@ -272,6 +336,6 @@ function Personality(props) {
   )
 }
 
-const FormInfo = { BasicInfo, AbilityTable, Background, Personality };
+const FormInfo = { BasicInfo, AbilityTable, Background, Personality, CharacterInfo };
 
 export default FormInfo;

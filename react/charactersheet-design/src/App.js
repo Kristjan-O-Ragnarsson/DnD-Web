@@ -18,7 +18,7 @@ function App() {
               <Grid.Column stretched>
 
                 <Segment>
-                  <FormInfo.BasicInfo />
+                  <FormInfo.CharacterInfo />
                 </Segment>
 
               </Grid.Column>
