@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { Form, Header, Table, Dropdown } from 'semantic-ui-react';
 import { useAsync } from "react-async";
 
+/**************************************************************
+ *                                                            *
+ *                Helpers and placeholders                    *
+ *                                                            *
+ **************************************************************/
 function fetchLoading(fetchName) {
   // Should return as: _placeholder = "loading" and _options=[{key: , text:}]
   return [
@@ -16,6 +21,7 @@ function fetchError(err, fetchName) {
   ];
 }
 
+// Fetching D&D data from a Flask API
 const loadRaces = async () => await fetch("https://api.open5e.com/races/")
   .then(res => (res.ok ? res : Promise.reject(res)))
   .then(res => res.json());
@@ -23,7 +29,7 @@ const loadClasses = async () => await fetch("https://api.open5e.com/classes/")
   .then(res => (res.ok ? res : Promise.reject(res)))
   .then(res => res.json());
 
-
+// Some placeholder values - would be removed in later versions
 const skills = {
   Athletics: {value: 0, other: "placeholder?"},
   Acrobatics: {value: 0, other: "placeholder?"},
@@ -44,7 +50,6 @@ const features = {
   placeholderFeature2: {value: 0, other: "placeholder?"},
   placeholderFeature3: {value: 0, other: "placeholder?"}
 }
-
 function setSelectOptions(obj) {
   let tempObject = [];
   for (let _key in obj) {
@@ -54,7 +59,22 @@ function setSelectOptions(obj) {
   };
   return tempObject;
 }
+const skillSelect = setSelectOptions(skills);
+const toolProfSelect = setSelectOptions(toolProfs);
+const languageSelect = setSelectOptions(languages);
+const featureSelect = setSelectOptions(features);
 
+/**************************************************************
+ *                                                            *
+ *             Parent component and form fiels                *
+ *              This is the main section. It is               *
+ *              split up into smaller sections                *
+ *                                                            *
+ **************************************************************/
+
+ /**********************
+  *   Parent component *
+  **********************/
 class CharacterInfo extends React.Component {
   constructor() {
     super();
@@ -73,9 +93,8 @@ class CharacterInfo extends React.Component {
     this.updateStat = this.updateStat.bind(this);
   }
 
+  // Update state with key value pairs
   updateStat(key, value) { this.setState({[key]: value}); console.log(this.state); }
-  //updateStat(key, value) { console.log(key + " and " + value)}
-  //updateStat(e) { this.setState({level: e.target.value}); }
 
   render() {
     return(
@@ -101,7 +120,12 @@ class CharacterInfo extends React.Component {
   }
 }
 
+/*********************************
+*   Handling leveling formula    *
+**********************************/
 function ChangeLevel(props) {
+  // This function includes a simple formula that automatically 
+  // increases the proficiency score based on the official rules
   function handleLevelChange(e) {
     let lvl = e.target.value;
     props.update("level", lvl);
@@ -112,6 +136,12 @@ function ChangeLevel(props) {
   );
 }
 
+/*********************************
+ *   Level and class selection   *
+ *********************************/
+// SelectRace and SelectClass are almost identical. 
+// We use a library called React-Async to fetch data and check for
+// the conditions isLoading, error and data (data is the result of fetching)
 function SelectRace(props) {
   let _placeholder = "";
   let _options = [];
@@ -174,40 +204,10 @@ function SelectClass(props) {
   );
 }
 
-const skillSelect = setSelectOptions(skills);
-const toolProfSelect = setSelectOptions(toolProfs);
-const languageSelect = setSelectOptions(languages);
-const featureSelect = setSelectOptions(features);
-function BasicInfo(props) {
-  const [prof, setProf] = useState(2);
-  function handleLevelChange(e) {
-    let lvl = e.target.value;
-    // Formula to calculate the proficiency bonus - can't be lower than 2
-    lvl < 1 ? setProf(2) : setProf(Math.floor((lvl-1)/4) + 2);
-  }
-
-  return (
-    <React.Fragment>
-      <Form.Group>
-        <Form.Input label="Character name" width={6} />
-        <Form.Input label="Player name" width={6} />
-        <Form.Input type="number" label="Level" width={3} onChange={handleLevelChange}/>
-      </Form.Group>
-      <Form.Group>
-        <SelectRace />
-        <SelectClass />
-        <Form.Input label="Proficiency" width={2} value={prof} />
-      </Form.Group>
-      <Form.Group>
-        <Form.Input label="HP" width={2} />
-        <Form.Input label="AC" width={2} />
-        <Form.Input label="Initiative" width={2} />
-        <Form.Input label="Speed" width={2} />
-      </Form.Group>
-    </React.Fragment>
-  )
-}
-
+ /*********************************
+  *   This is the ability table   *
+  *   It is str, dex, con, etc.   *
+  *********************************/
 class AbilityTable extends React.Component {
   constructor(props) {
     super(props);
@@ -226,6 +226,7 @@ class AbilityTable extends React.Component {
     };
   }
 
+  // This function does not work and needs to be worked on. I couldn't get to it in time
   updateAbilityScore(ability) {
     return ability.base + ability.raceMod + ability.otherMod;
   }
@@ -269,7 +270,10 @@ class AbilityTable extends React.Component {
   }
 }
 
-
+/*********************************
+*   This section is for          *
+*   background selection         *
+**********************************/
 function Background(props) {
 
   return (
@@ -325,6 +329,9 @@ function Background(props) {
   );
 }
 
+/**************************************
+*   Section for personality options   *
+***************************************/
 function Personality(props) {
   return (
     <React.Fragment>
@@ -336,6 +343,9 @@ function Personality(props) {
   )
 }
 
-const FormInfo = { BasicInfo, AbilityTable, Background, Personality, CharacterInfo };
+// Gather all of our components into a variable
+// Ideally this would just be one class with a reference to each component
+const FormInfo = { CharacterInfo, AbilityTable, Background, Personality };
 
+// Export the form to be plugged into the final website
 export default FormInfo;
