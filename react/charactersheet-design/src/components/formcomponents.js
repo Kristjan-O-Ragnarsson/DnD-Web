@@ -1,25 +1,14 @@
 import React from 'react';
 import { Form, Header, Table, Dropdown } from 'semantic-ui-react';
 import { useAsync } from "react-async";
+import Helpers from "./helpers.js";
 
 /**************************************************************
  *                                                            *
  *                Helpers and placeholders                    *
  *                                                            *
  **************************************************************/
-function fetchLoading(fetchName) {
-  // Should return as: _placeholder = "loading" and _options=[{key: , text:}]
-  return [
-    "loading",
-    [{key:`${fetchName}_loading`, text:"loading"}]
-  ];
-}
-function fetchError(err, fetchName) {
-  return [
-    `Something went wrong: ${err.message}`,
-    [{key:`${fetchName}_error`, text:"error"}]
-  ];
-}
+
 
 // Fetching D&D data from a Flask API
 const loadRaces = async () => await fetch("https://api.open5e.com/races/")
@@ -146,8 +135,8 @@ function SelectRace(props) {
   let _placeholder = "";
   let _options = [];
   const { data, error, isLoading } = useAsync({ promiseFn: loadRaces });
-  if (isLoading) [_placeholder, _options] = fetchLoading("race"); 
-  if (error) [_placeholder, _options] = fetchError(error.message, "race");
+  if (isLoading) [_placeholder, _options] = Helpers.fetchLoading("race"); 
+  if (error) [_placeholder, _options] = Helpers.fetchError(error.message, "race");
   if (data) {
     _placeholder = data.results[0].name;
     _options = data.results.map(race => {
@@ -177,8 +166,8 @@ function SelectClass(props) {
   let _placeholder = "";
   let _options = [];
   const { data, error, isLoading } = useAsync({ promiseFn: loadClasses });
-  if (isLoading) [_placeholder, _options] = fetchLoading("class"); 
-  if (error) [_placeholder, _options] = fetchError(error.message, "class");
+  if (isLoading) [_placeholder, _options] = Helpers.fetchLoading("class"); 
+  if (error) [_placeholder, _options] = Helpers.fetchError(error.message, "class");
   if (data) {
     _placeholder = data.results[0].name;
     _options = data.results.map(_class => {
